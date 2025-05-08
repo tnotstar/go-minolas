@@ -1,3 +1,3 @@
-# The `tgotlib` library
+# The `go-minolas` library
 
-A set of Go routines that I use to include in my daily work.
+A set of Go stuff that I'm used to include in my daily work.

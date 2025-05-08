@@ -1,3 +1,3 @@
-module github.com/tnotstar/tgotlib
+module github.com/tnotstar/go-minolas
 
 go 1.24.0
