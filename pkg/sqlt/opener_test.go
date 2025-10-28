@@ -29,7 +29,7 @@ func (m *mockOpener) Open(u *url.URL) (*sql.DB, error) {
 func TestOpenDB_InvalidURLReturnsAnError(t *testing.T) {
 	resetOpeners()
 
-	_, err := OpenDB("%#@$")
+	_, err := Open("%#@$")
 	if err == nil {
 		t.Error("expected error for invalid URL, got nil")
 	}
@@ -38,7 +38,7 @@ func TestOpenDB_InvalidURLReturnsAnError(t *testing.T) {
 func TestOpenDB_NoMatchingOpenerReturnsErrUnsupportedOpener(t *testing.T) {
 	resetOpeners()
 
-	_, err := OpenDB("notfound://user:pass@localhost/db")
+	_, err := Open("notfound://user:pass@localhost/db")
 	if !errors.Is(err, ErrUnsupportedOpener) {
 		t.Errorf("expected ErrUnsupportedOpener, got %v", err)
 	}
@@ -53,7 +53,7 @@ func TestOpenDB_MatchingOpenerReturnsTheOpenedDB(t *testing.T) {
 	resetOpeners()
 	registerOpener(op)
 
-	db, err := OpenDB("mock://anything")
+	db, err := Open("mock://anything")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -71,7 +71,7 @@ func TestOpen_MatchingOpenerReturnsError(t *testing.T) {
 	resetOpeners()
 	registerOpener(op)
 
-	_, err := OpenDB("mock://anything")
+	_, err := Open("mock://anything")
 	if err == nil || err.Error() != "fail" {
 		t.Errorf("expected error 'fail', got %v", err)
 	}
@@ -104,7 +104,7 @@ func TestRegister_ValidOpener(t *testing.T) {
 	resetOpeners()
 	registerOpener(op)
 
-	if got, ok := theOpeners["valid"]; !ok || got != op {
+	if got, ok := openers["valid"]; !ok || got != op {
 		t.Error("opener not registered correctly")
 	}
 }

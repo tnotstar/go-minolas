@@ -17,15 +17,15 @@ type Opener interface {
 	CanOpen(*url.URL) bool
 }
 
-func OpenDB(dburl string) (*sql.DB, error) {
-	theOpenersLock.Lock()
-	defer theOpenersLock.Unlock()
+func Open(dburl string) (*sql.DB, error) {
+	openersMu.Lock()
+	defer openersMu.Unlock()
 
 	u, err := url.Parse(dburl)
 	if err != nil {
 		return nil, err
 	}
-	for _, op := range theOpeners {
+	for _, op := range openers {
 		if op.CanOpen(u) {
 			return op.Open(u)
 		}
@@ -33,28 +33,28 @@ func OpenDB(dburl string) (*sql.DB, error) {
 	return nil, ErrUnsupportedOpener
 }
 
-var theOpeners = make(map[string]Opener)
-var theOpenersLock sync.RWMutex
+var openers = make(map[string]Opener)
+var openersMu sync.RWMutex
 
 func registerOpener(opener Opener) {
-	theOpenersLock.Lock()
-	defer theOpenersLock.Unlock()
+	openersMu.Lock()
+	defer openersMu.Unlock()
 
 	if opener == nil {
 		panic("sqlt: Register opener is nil")
 	}
 	id := opener.Id()
-	if _, dup := theOpeners[id]; dup {
+	if _, dup := openers[id]; dup {
 		panic("sql: Register called twice for driver: " + id)
 	}
-	theOpeners[id] = opener
+	openers[id] = opener
 }
 
 func resetOpeners() {
-	theOpenersLock.Lock()
-	defer theOpenersLock.Unlock()
+	openersMu.Lock()
+	defer openersMu.Unlock()
 
-	for op := range theOpeners {
-		delete(theOpeners, op)
+	for op := range openers {
+		delete(openers, op)
 	}
 }
