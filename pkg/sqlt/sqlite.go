@@ -3,50 +3,54 @@ package sqlt
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/url"
 
 	_ "modernc.org/sqlite"
 )
 
+// SqliteOpener implements the Opener interface for SQLite databases.
+// It supports both "sqlite" and "sqlite3" URL schemes.
+//
+// URL format: sqlite://[path][?query]
+//
+// Examples:
+//   - sqlite::memory: - in-memory database
+//   - sqlite:file.db - file-based database
+//   - sqlite:file.db?mode=ro - read-only database
 type SqliteOpener struct {
 }
 
+// Id returns the unique identifier for the SQLite opener.
 func (o *SqliteOpener) Id() string {
 	return "sqlite"
 }
 
+// Open opens a SQLite database connection using the provided URL.
+// Returns an error if the URL is nil, has an unsupported scheme,
+// or if the database connection cannot be established.
 func (o *SqliteOpener) Open(u *url.URL) (*sql.DB, error) {
 	if u == nil {
-		return nil, errors.New("sqlt: database url cannot be nil for SqliteOpener")
+		return nil, errors.New("sqlt: database URL cannot be nil for SqliteOpener")
 	}
 	if !o.CanOpen(u) {
-		return nil, errors.New("sqlt: invalid database `url` for SqliteOpener")
+		return nil, fmt.Errorf("sqlt: scheme %q not supported by SqliteOpener (expected sqlite or sqlite3)", u.Scheme)
 	}
-	var dsn string
 
-	if u.Opaque != "" {
-		// For "sqlite3:file.db?mode=memory", u.Opaque is "file.db" and u.RawQuery
-		// is "mode=memory".
-		// The DSN for sqlite is everything after the scheme and '://'.
-		dsn = u.Opaque
-	} else if u.Path != "" {
-		// For "sqlite3:///path/to/db.sqlite", u.Path is "/path/to/db.sqlite".
-		// For path-based URLs like sqlite3:///path/to/file.db
-		// u.Path will be /path/to/file.db.
-		// On Windows, sqlite3:///C:/path/to/file.db gives u.Path /C:/path/to/file.db
-		dsn = u.Path
-	}
+	// Build DSN from URL components
+	dsn := u.Host + u.Path
 	if u.RawQuery != "" {
-		dsn = dsn + "?" + u.RawQuery
+		dsn += "?" + u.RawQuery
 	}
-
-	return sql.Open(o.Id(), dsn)
+	return sql.Open("sqlite", dsn)
 }
 
+// CanOpen reports whether this opener can handle the given URL.
+// It returns true for "sqlite" and "sqlite3" schemes.
 func (o *SqliteOpener) CanOpen(u *url.URL) bool {
 	return u.Scheme == "sqlite" || u.Scheme == "sqlite3"
 }
 
 func init() {
-	registerOpener(&SqliteOpener{})
+	RegisterOpener(&SqliteOpener{})
 }

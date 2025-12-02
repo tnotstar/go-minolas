@@ -59,3 +59,36 @@ func TestSqliteOpener_Open_Memory(t *testing.T) {
 	// close to release resources
 	_ = db.Close()
 }
+
+func TestSqliteOpener_Open(t *testing.T) {
+	o := &SqliteOpener{}
+	cases := []struct {
+		name    string
+		u       string
+		wantErr bool
+	}{
+		{"memory db", "sqlite::memory:", false},
+		{"memory db with query", "sqlite::memory:?cache=shared", false},
+		{"file db", "sqlite:test.db", false},
+		{"file db with path", "sqlite:///tmp/test.db", false},
+		{"file db with query", "sqlite:test.db?mode=ro", false},
+		{"unsupported scheme", "mysql://localhost", true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			u, err := url.Parse(tc.u)
+			if err != nil {
+				t.Fatalf("failed to parse url %q: %v", tc.u, err)
+			}
+			db, err := o.Open(u)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Open() error = %v, wantErr %v", err, tc.wantErr)
+				return
+			}
+			if db != nil {
+				_ = db.Close()
+			}
+		})
+	}
+}
