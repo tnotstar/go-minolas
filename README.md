@@ -45,6 +45,7 @@ Database connection utilities with URL-based configuration and a pluggable drive
 - Open database connections using URL schemes
 - Pluggable driver system via `Opener` interface
 - Built-in SQLite support (via modernc.org/sqlite)
+- Built-in MS SQL Server & Azure SQL Database support (via github.com/microsoft/go-mssqldb)
 - Thread-safe driver registration
 
 **Example:**
@@ -53,6 +54,13 @@ import "github.com/tnotstar/go-minolas/pkg/sqlt"
 
 // Open an in-memory SQLite database
 db, err := sqlt.Open("sqlite::memory:")
+if err != nil {
+    log.Fatal(err)
+}
+defer db.Close()
+
+// Open a Microsoft SQL Server database
+db, err = sqlt.Open("sqlserver://user:pass@localhost:1433?database=mydb")
 if err != nil {
     log.Fatal(err)
 }
@@ -67,7 +75,8 @@ defer db.Close()
 ```
 
 **Supported schemes:**
-- `sqlite://` or `sqlite3://` - SQLite databases
+- `sqlite://` or `sqlite3://` - SQLite databases (modernc.org/sqlite)
+- `sqlserver://` - Microsoft SQL Server 2022 & Azure SQL Database (github.com/microsoft/go-mssqldb)
 
 **Custom Drivers:**
 
