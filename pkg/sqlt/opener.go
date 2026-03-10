@@ -24,6 +24,7 @@ var (
 // Each opener is responsible for handling specific database URL schemes
 // and creating appropriate database connections.
 type Opener interface {
+
 	// Id returns a unique identifier for this opener.
 	Id() string
 
