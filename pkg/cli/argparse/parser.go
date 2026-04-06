@@ -55,32 +55,32 @@ type argDef struct {
 	seen bool
 }
 
-// Option defines a functional option for argument configuration.
-type Option func(*argDef)
+// ArgumentOption defines a functional option for argument configuration.
+type ArgumentOption func(*argDef)
 
 // Short sets the short flag name (e.g. "v" for -v).
-func Short(s string) Option {
+func Short(s string) ArgumentOption {
 	return func(a *argDef) {
 		a.short = s
 	}
 }
 
 // Help sets the description of the argument.
-func Help(h string) Option {
+func Help(h string) ArgumentOption {
 	return func(a *argDef) {
 		a.help = h
 	}
 }
 
 // Default sets a default value for the argument.
-func Default(v interface{}) Option {
+func Default(v interface{}) ArgumentOption {
 	return func(a *argDef) {
 		a.defaultVal = v
 	}
 }
 
 // Required ensures this argument must be provided.
-func Required() Option {
+func Required() ArgumentOption {
 	return func(a *argDef) {
 		a.required = true
 	}
@@ -100,7 +100,7 @@ func (p *ArgumentParser) isFlag(name string) bool {
 	return strings.HasPrefix(name, "-")
 }
 
-func (p *ArgumentParser) addArg(name string, typ argType, dest interface{}, opts ...Option) {
+func (p *ArgumentParser) addArg(name string, typ argType, dest interface{}, opts ...ArgumentOption) {
 	a := &argDef{
 		name:    name,
 		typ:     typ,
@@ -159,28 +159,28 @@ func (p *ArgumentParser) applyVal(a *argDef, val interface{}) {
 }
 
 // String defines a string argument and returns a pointer to its parsed value.
-func (p *ArgumentParser) String(name string, opts ...Option) *string {
+func (p *ArgumentParser) String(name string, opts ...ArgumentOption) *string {
 	var v string
 	p.addArg(name, typeString, &v, opts...)
 	return &v
 }
 
 // Int defines an integer argument and returns a pointer to its parsed value.
-func (p *ArgumentParser) Int(name string, opts ...Option) *int {
+func (p *ArgumentParser) Int(name string, opts ...ArgumentOption) *int {
 	var v int
 	p.addArg(name, typeInt, &v, opts...)
 	return &v
 }
 
 // Bool defines a boolean argument and returns a pointer to its parsed value.
-func (p *ArgumentParser) Bool(name string, opts ...Option) *bool {
+func (p *ArgumentParser) Bool(name string, opts ...ArgumentOption) *bool {
 	var v bool
 	p.addArg(name, typeBool, &v, opts...)
 	return &v
 }
 
 // StringList defines a string list argument (which can be passed multiple times) and returns it.
-func (p *ArgumentParser) StringList(name string, opts ...Option) *[]string {
+func (p *ArgumentParser) StringList(name string, opts ...ArgumentOption) *[]string {
 	var v []string
 	p.addArg(name, typeStrList, &v, opts...)
 	return &v
