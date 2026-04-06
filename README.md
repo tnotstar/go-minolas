@@ -73,7 +73,7 @@ if dbCmd.Invoked() {
 }
 ```
 
-### `pkg/sqlt`
+### `pkg/db/sqlt`
 
 Database connection utilities with URL-based configuration and a pluggable driver architecture.
 
@@ -86,7 +86,7 @@ Database connection utilities with URL-based configuration and a pluggable drive
 
 **Example:**
 ```go
-import "github.com/tnotstar/go-minolas/pkg/sqlt"
+import "github.com/tnotstar/go-minolas/pkg/db/sqlt"
 
 // Open an in-memory SQLite database
 db, err := sqlt.Open("sqlite::memory:")

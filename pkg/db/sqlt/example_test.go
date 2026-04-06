@@ -3,7 +3,7 @@ package sqlt_test
 import (
 	"fmt"
 
-	"github.com/tnotstar/go-minolas/pkg/sqlt"
+	"github.com/tnotstar/go-minolas/pkg/db/sqlt"
 )
 
 func ExampleListOpeners() {
