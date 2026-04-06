@@ -33,8 +33,44 @@ name, err := cli.ReadInput("Enter your name: ", func(s string) error {
     if s == "" {
         return errors.New("name cannot be empty")
     }
-    return nil
 })
+```
+
+### `pkg/cli/argparse`
+
+A lightweight, Python-inspired argument parsing library utilizing pure Go standard library functionality. It provides type-safe functional configuration, automatic usage generation, and nestable subcommand parsing.
+
+**Example:**
+```go
+import "github.com/tnotstar/go-minolas/pkg/cli/argparse"
+
+// Initialize parser
+parser := argparse.NewArgumentParser("deployer", "Deploy applications")
+	
+// Flags
+verbose := parser.Bool("--verbose", argparse.Short("v"), argparse.Help("Enable verbose mode"))
+region := parser.String("--region", argparse.Default("us-east-1"))
+
+// Positional arguments
+appName := parser.String("app", argparse.Required())
+
+// Subcommands
+dbCmd := parser.NewCommand("db", "Database tools")
+host := dbCmd.String("--host", argparse.Default("localhost"))
+
+if err := parser.Parse(os.Args[1:]); err != nil {
+    if err == argparse.ErrHelp {
+        fmt.Print(parser.Usage())
+        os.Exit(0)
+    }
+    fmt.Println(err)
+    fmt.Print(parser.Usage())
+    os.Exit(1)
+}
+
+if dbCmd.Invoked() {
+    fmt.Println("Connecting to", *host)
+}
 ```
 
 ### `pkg/sqlt`
