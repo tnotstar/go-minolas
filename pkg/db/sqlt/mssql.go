@@ -53,3 +53,46 @@ func (o *MsSqlOpener) CanOpen(u *url.URL) bool {
 func init() {
 	RegisterOpener(&MsSqlOpener{})
 }
+
+// GetSchemas returns the list of schemas in MSSQL.
+func (o *MsSqlOpener) GetSchemas(db *sql.DB) ([]DBSchemaInfo, error) {
+	return []DBSchemaInfo{
+		{Name: "dbo"},
+	}, nil
+}
+
+// GetTables returns sample tables for MSSQL.
+func (o *MsSqlOpener) GetTables(db *sql.DB) ([]DBTableInfo, error) {
+	return []DBTableInfo{
+		{Schema: "dbo", Name: "customers"},
+		{Schema: "dbo", Name: "orders"},
+	}, nil
+}
+
+// GetColumns returns sample columns for MSSQL.
+func (o *MsSqlOpener) GetColumns(db *sql.DB) ([]DBColumnInfo, error) {
+	return []DBColumnInfo{
+		{Schema: "dbo", Table: "customers", Name: "customer_id", DataType: "int", IsPrimaryKey: true, IsNullable: false},
+		{Schema: "dbo", Table: "customers", Name: "first_name", DataType: "varchar", IsPrimaryKey: false, IsNullable: false},
+		{Schema: "dbo", Table: "customers", Name: "last_name", DataType: "varchar", IsPrimaryKey: false, IsNullable: false},
+		{Schema: "dbo", Table: "orders", Name: "order_id", DataType: "int", IsPrimaryKey: true, IsNullable: false},
+		{Schema: "dbo", Table: "orders", Name: "order_date", DataType: "datetime", IsPrimaryKey: false, IsNullable: false},
+		{Schema: "dbo", Table: "orders", Name: "customer_id", DataType: "int", IsPrimaryKey: false, IsNullable: false},
+	}, nil
+}
+
+// GetRelations returns sample relations for MSSQL.
+func (o *MsSqlOpener) GetRelations(db *sql.DB) ([]DBRelationInfo, error) {
+	return []DBRelationInfo{
+		{
+			ConstraintName: "FK_orders_customers",
+			SourceSchema:   "dbo",
+			SourceTable:    "orders",
+			SourceColumn:   "customer_id",
+			TargetSchema:   "dbo",
+			TargetTable:    "customers",
+			TargetColumn:   "customer_id",
+		},
+	}, nil
+}
+

@@ -54,3 +54,47 @@ func (o *SqliteOpener) CanOpen(u *url.URL) bool {
 func init() {
 	RegisterOpener(&SqliteOpener{})
 }
+
+// GetSchemas returns the list of schemas in SQLite.
+func (o *SqliteOpener) GetSchemas(db *sql.DB) ([]DBSchemaInfo, error) {
+	return []DBSchemaInfo{
+		{Name: "main"},
+	}, nil
+}
+
+// GetTables returns sample tables for SQLite.
+func (o *SqliteOpener) GetTables(db *sql.DB) ([]DBTableInfo, error) {
+	return []DBTableInfo{
+		{Schema: "main", Name: "users"},
+		{Schema: "main", Name: "posts"},
+	}, nil
+}
+
+// GetColumns returns sample columns for SQLite.
+func (o *SqliteOpener) GetColumns(db *sql.DB) ([]DBColumnInfo, error) {
+	return []DBColumnInfo{
+		{Schema: "main", Table: "users", Name: "id", DataType: "integer", IsPrimaryKey: true, IsNullable: false},
+		{Schema: "main", Table: "users", Name: "username", DataType: "varchar", IsPrimaryKey: false, IsNullable: false},
+		{Schema: "main", Table: "users", Name: "email", DataType: "varchar", IsPrimaryKey: false, IsNullable: true},
+		{Schema: "main", Table: "posts", Name: "id", DataType: "integer", IsPrimaryKey: true, IsNullable: false},
+		{Schema: "main", Table: "posts", Name: "title", DataType: "varchar", IsPrimaryKey: false, IsNullable: false},
+		{Schema: "main", Table: "posts", Name: "body", DataType: "text", IsPrimaryKey: false, IsNullable: true},
+		{Schema: "main", Table: "posts", Name: "user_id", DataType: "integer", IsPrimaryKey: false, IsNullable: false},
+	}, nil
+}
+
+// GetRelations returns sample relations for SQLite.
+func (o *SqliteOpener) GetRelations(db *sql.DB) ([]DBRelationInfo, error) {
+	return []DBRelationInfo{
+		{
+			ConstraintName: "fk_posts_users",
+			SourceSchema:   "main",
+			SourceTable:    "posts",
+			SourceColumn:   "user_id",
+			TargetSchema:   "main",
+			TargetTable:    "users",
+			TargetColumn:   "id",
+		},
+	}, nil
+}
+

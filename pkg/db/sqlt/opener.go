@@ -10,6 +10,7 @@ package sqlt
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/url"
 	"sync"
 )
@@ -114,3 +115,23 @@ func ListOpeners() []string {
 	}
 	return ids
 }
+
+// GetExtractor returns the MetadataExtractor associated with the scheme of the database URL.
+func GetExtractor(dburl string) (MetadataExtractor, error) {
+	u, err := url.Parse(dburl)
+	if err != nil {
+		return nil, err
+	}
+	openersMu.RLock()
+	defer openersMu.RUnlock()
+	for _, op := range openers {
+		if op.CanOpen(u) {
+			if extractor, ok := op.(MetadataExtractor); ok {
+				return extractor, nil
+			}
+			return nil, fmt.Errorf("sqlt: opener %q does not implement MetadataExtractor", op.Id())
+		}
+	}
+	return nil, ErrUnsupportedOpener
+}
+

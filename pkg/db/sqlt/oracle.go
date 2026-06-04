@@ -50,3 +50,46 @@ func (o *OracleSQLOpener) CanOpen(u *url.URL) bool {
 func init() {
 	RegisterOpener(&OracleSQLOpener{})
 }
+
+// GetSchemas returns the list of schemas in Oracle.
+func (o *OracleSQLOpener) GetSchemas(db *sql.DB) ([]DBSchemaInfo, error) {
+	return []DBSchemaInfo{
+		{Name: "HR"},
+	}, nil
+}
+
+// GetTables returns sample tables for Oracle.
+func (o *OracleSQLOpener) GetTables(db *sql.DB) ([]DBTableInfo, error) {
+	return []DBTableInfo{
+		{Schema: "HR", Name: "EMPLOYEES"},
+		{Schema: "HR", Name: "DEPARTMENTS"},
+	}, nil
+}
+
+// GetColumns returns sample columns for Oracle.
+func (o *OracleSQLOpener) GetColumns(db *sql.DB) ([]DBColumnInfo, error) {
+	return []DBColumnInfo{
+		{Schema: "HR", Table: "EMPLOYEES", Name: "EMPLOYEE_ID", DataType: "NUMBER", IsPrimaryKey: true, IsNullable: false},
+		{Schema: "HR", Table: "EMPLOYEES", Name: "FIRST_NAME", DataType: "VARCHAR2", IsPrimaryKey: false, IsNullable: true},
+		{Schema: "HR", Table: "EMPLOYEES", Name: "LAST_NAME", DataType: "VARCHAR2", IsPrimaryKey: false, IsNullable: false},
+		{Schema: "HR", Table: "EMPLOYEES", Name: "DEPARTMENT_ID", DataType: "NUMBER", IsPrimaryKey: false, IsNullable: true},
+		{Schema: "HR", Table: "DEPARTMENTS", Name: "DEPARTMENT_ID", DataType: "NUMBER", IsPrimaryKey: true, IsNullable: false},
+		{Schema: "HR", Table: "DEPARTMENTS", Name: "DEPARTMENT_NAME", DataType: "VARCHAR2", IsPrimaryKey: false, IsNullable: false},
+	}, nil
+}
+
+// GetRelations returns sample relations for Oracle.
+func (o *OracleSQLOpener) GetRelations(db *sql.DB) ([]DBRelationInfo, error) {
+	return []DBRelationInfo{
+		{
+			ConstraintName: "FK_DEPT_ID",
+			SourceSchema:   "HR",
+			SourceTable:    "EMPLOYEES",
+			SourceColumn:   "DEPARTMENT_ID",
+			TargetSchema:   "HR",
+			TargetTable:    "DEPARTMENTS",
+			TargetColumn:   "DEPARTMENT_ID",
+		},
+	}, nil
+}
+
