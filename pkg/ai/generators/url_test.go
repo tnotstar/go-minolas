@@ -7,10 +7,10 @@ import (
 
 func TestSplitLastSegment(t *testing.T) {
 	testCases := []struct {
-		name      string
-		path      string
-		wantPre   string
-		wantLast  string
+		name     string
+		path     string
+		wantPre  string
+		wantLast string
 	}{
 		{name: "empty path", path: "", wantPre: "", wantLast: ""},
 		{name: "slash only", path: "/", wantPre: "", wantLast: ""},
@@ -36,14 +36,14 @@ func TestSplitLastSegment(t *testing.T) {
 
 func TestParseProviderURL(t *testing.T) {
 	testCases := []struct {
-		name             string
-		rawurl           string
-		httpScheme       string
-		defaultHost      string
-		defaultPathPre   string
-		defaultModel     string
-		wantBaseURL      string
-		wantModel        string
+		name           string
+		rawurl         string
+		httpScheme     string
+		defaultHost    string
+		defaultPathPre string
+		defaultModel   string
+		wantBaseURL    string
+		wantModel      string
 	}{
 		{
 			name:           "gemini minimal",

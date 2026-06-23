@@ -99,7 +99,7 @@ func TestBooleanFormat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if !*b1 {
 		t.Errorf("expected b1 true")
 	}

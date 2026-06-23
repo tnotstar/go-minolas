@@ -97,4 +97,3 @@ func (o *SqliteOpener) GetRelations(db *sql.DB) ([]DBRelationInfo, error) {
 		},
 	}, nil
 }
-

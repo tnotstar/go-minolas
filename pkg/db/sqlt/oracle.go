@@ -92,4 +92,3 @@ func (o *OracleSQLOpener) GetRelations(db *sql.DB) ([]DBRelationInfo, error) {
 		},
 	}, nil
 }
-

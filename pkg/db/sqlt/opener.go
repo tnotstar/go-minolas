@@ -134,4 +134,3 @@ func GetExtractor(dburl string) (MetadataExtractor, error) {
 	}
 	return nil, ErrUnsupportedOpener
 }
-
