@@ -2,6 +2,22 @@
 
 A collection of reusable Go utilities for common tasks in daily development work.
 
+## Public Specifications
+
+Contractual design, functionality, and security parameters are documented in the local `openspec` directory:
+- [Functional Specs](file:///home/tnotstar/Workspaces/Personal/work-on-go/go-minolas/openspec/system/system-spec.md)
+- [Architecture Details](file:///home/tnotstar/Workspaces/Personal/work-on-go/go-minolas/openspec/system/architecture.md)
+- [Security Profile](file:///home/tnotstar/Workspaces/Personal/work-on-go/go-minolas/openspec/system/security-profile.md)
+
+## Development Workflow
+
+### Agent Integration Workflow
+When working with AI coding agents:
+- Agents consult the root `AGENTS.md` file for global workspace design constraints.
+- Specifications must be updated in `openspec/` prior to any code modifications.
+- Local capabilities, agent commands, or custom workspace settings must remain in the private root `.agents/` folder and never leak into this public submodule repository.
+
+
 ## Installation
 
 ```bash
