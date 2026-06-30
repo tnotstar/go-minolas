@@ -39,5 +39,5 @@ go.work.sum
 *.vsix
 
 # Avoid agentic files
-.agents/*
-.crush/*
+.agents
+.crush
