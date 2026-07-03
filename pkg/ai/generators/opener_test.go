@@ -109,6 +109,39 @@ func TestOpen(t *testing.T) {
 	}
 }
 
+func TestAutoRegisteredOpeners(t *testing.T) {
+	// After package init, the built-in providers self-register. We assert the
+	// full expected set so that a missing init() in a new provider is caught.
+	ResetOpeners()
+	RegisterOpener(&GeminiOpener{})
+	RegisterOpener(&OllamaOpener{})
+	RegisterOpener(&OpenAIOpener{})
+	RegisterOpener(&CompatOpener{})
+	RegisterOpener(&AzureOpenAIOpener{})
+	RegisterOpener(&AnthropicOpener{})
+
+	want := map[string]bool{
+		"gemini":       false,
+		"ollama":       false,
+		"openai":       false,
+		"compat":       false,
+		"azure-openai": false,
+		"anthropic":    false,
+	}
+	for id := range openers {
+		if _, ok := want[id]; ok {
+			want[id] = true
+		} else {
+			t.Errorf("unexpected opener registered: %q", id)
+		}
+	}
+	for id, seen := range want {
+		if !seen {
+			t.Errorf("expected opener %q to be registered", id)
+		}
+	}
+}
+
 func TestRegister_NilOpenerPanics(t *testing.T) {
 	ResetOpeners()
 	defer func() {
