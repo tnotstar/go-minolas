@@ -82,48 +82,17 @@ if dbCmd.Invoked() {
 
 ### `pkg/db/sqlt`
 
-Database connection utilities with URL-based configuration and a pluggable driver architecture.
+Database connection utilities with URL-based configuration and a pluggable driver architecture built purely on `database/sql`.
 
 **Features:**
 - Open database connections using URL schemes
 - Pluggable driver system via `Opener` interface
-- Built-in SQLite support (via modernc.org/sqlite)
-- Built-in MS SQL Server & Azure SQL Database support (via github.com/microsoft/go-mssqldb)
+- Zero bundled third-party drivers: target executables import their own `database/sql` drivers and register matching `Opener` implementations
 - Thread-safe driver registration
-
-**Example:**
-```go
-import "github.com/tnotstar/go-minolas/pkg/db/sqlt"
-
-// Open an in-memory SQLite database
-db, err := sqlt.Open("sqlite::memory:")
-if err != nil {
-    log.Fatal(err)
-}
-defer db.Close()
-
-// Open a Microsoft SQL Server database
-db, err = sqlt.Open("sqlserver://user:pass@localhost:1433?database=mydb")
-if err != nil {
-    log.Fatal(err)
-}
-defer db.Close()
-
-// Open a file-based SQLite database with options
-db, err = sqlt.Open("sqlite:mydb.db?mode=rwc&cache=shared")
-if err != nil {
-    log.Fatal(err)
-}
-defer db.Close()
-```
-
-**Supported schemes:**
-- `sqlite://` or `sqlite3://` - SQLite databases (modernc.org/sqlite)
-- `sqlserver://` - Microsoft SQL Server 2022 & Azure SQL Database (github.com/microsoft/go-mssqldb)
 
 **Custom Drivers:**
 
-You can register custom database drivers by implementing the `Opener` interface:
+Target applications register database drivers by implementing the `Opener` interface:
 
 ```go
 type MyOpener struct{}
@@ -131,12 +100,22 @@ type MyOpener struct{}
 func (o *MyOpener) Id() string { return "mydriver" }
 func (o *MyOpener) CanOpen(u *url.URL) bool { return u.Scheme == "mydriver" }
 func (o *MyOpener) Open(u *url.URL) (*sql.DB, error) {
-    // Custom opening logic
+    // Custom opening logic using database/sql
 }
 
 func init() {
     sqlt.RegisterOpener(&MyOpener{})
 }
+```
+
+Then open connections anywhere via:
+
+```go
+db, err := sqlt.Open("mydriver://localhost/mydb")
+if err != nil {
+    log.Fatal(err)
+}
+defer db.Close()
 ```
 
 ## Testing

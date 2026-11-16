@@ -199,6 +199,24 @@ func (p *ArgumentParser) Invoked() bool {
 	return p.invoked
 }
 
+// Seen reports whether the named flag or positional argument was explicitly
+// provided during Parse. Leading dashes on flag names are ignored.
+func (p *ArgumentParser) Seen(name string) bool {
+	clean := strings.TrimLeft(name, "-")
+	if clean == "" {
+		return false
+	}
+	if def, ok := p.optArgs[clean]; ok {
+		return def.seen
+	}
+	for _, a := range p.posArgs {
+		if a.name == name {
+			return a.seen
+		}
+	}
+	return false
+}
+
 // parseEngine defines the internal parse logic
 type parseEngine struct {
 	args []string
@@ -212,13 +230,6 @@ func (e *parseEngine) next() (string, bool) {
 	v := e.args[e.pos]
 	e.pos++
 	return v, true
-}
-
-func (e *parseEngine) peek() (string, bool) {
-	if e.pos >= len(e.args) {
-		return "", false
-	}
-	return e.args[e.pos], true
 }
 
 // Parse processes the provided arguments and returns an error if any.
@@ -272,11 +283,13 @@ func (p *ArgumentParser) Parse(args []string) error {
 			}
 
 			val := ""
+			hasEq := false
 
 			// check for --flag=value format
 			if idx := strings.IndexByte(name, '='); idx != -1 {
 				val = name[idx+1:]
 				name = name[:idx]
+				hasEq = true
 			}
 
 			def, exists := p.optArgs[name]
@@ -288,7 +301,7 @@ func (p *ArgumentParser) Parse(args []string) error {
 
 			if def.typ == typeBool {
 				// boolean flags don't consume next arg unless it's in --flag=value form
-				if val == "" {
+				if !hasEq {
 					*def.destPtr.(*bool) = true
 				} else {
 					b, err := strconv.ParseBool(val)
@@ -300,13 +313,13 @@ func (p *ArgumentParser) Parse(args []string) error {
 				continue
 			}
 
-			// for non-bool, if val is empty, we must consume the next argument
-			if val == "" {
-				nextArg, hasNext := e.peek()
-				if !hasNext || (strings.HasPrefix(nextArg, "-") && nextArg != "-") {
+			// for non-bool, if no '=' was given, consume the next argument
+			if !hasEq {
+				nextVal, hasNext := e.next()
+				if !hasNext {
 					return fmt.Errorf("argument %s requires a value", arg)
 				}
-				val, _ = e.next() // consume
+				val = nextVal
 			}
 
 			if err := p.parseValue(def, val); err != nil {
