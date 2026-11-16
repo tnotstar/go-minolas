@@ -117,3 +117,88 @@ func TestUnknownFlag(t *testing.T) {
 		t.Fatal("expected error for unknown flag")
 	}
 }
+
+func TestSeen(t *testing.T) {
+	p := NewArgumentParser("test", "")
+	prio := p.String("-p", Default("B"))
+	verbose := p.Bool("--verbose", Short("v"))
+	target := p.String("target")
+
+	if err := p.Parse([]string{"-p", "B", "main"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if *prio != "B" || *verbose {
+		t.Fatalf("unexpected values: prio=%q verbose=%v", *prio, *verbose)
+	}
+	if !p.Seen("p") || !p.Seen("-p") {
+		t.Error("expected -p to be marked as seen even with default value")
+	}
+	if p.Seen("verbose") || p.Seen("v") {
+		t.Error("expected --verbose not to be marked as seen")
+	}
+	if !p.Seen("target") || *target != "main" {
+		t.Error("expected positional target to be marked as seen")
+	}
+	if p.Seen("nonexistent") || p.Seen("-") {
+		t.Error("expected unknown/empty flag names not to be seen")
+	}
+}
+
+func TestEmptyEqualValueAndDashValues(t *testing.T) {
+	p := NewArgumentParser("test", "")
+	title := p.String("--title", Default("fallback"))
+	count := p.Int("--count")
+	pos := p.String("pos")
+
+	if err := p.Parse([]string{"--title=", "--count", "-5", "item"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if *title != "" {
+		t.Errorf("expected empty title, got %q", *title)
+	}
+	if *count != -5 {
+		t.Errorf("expected count -5, got %d", *count)
+	}
+	if *pos != "item" {
+		t.Errorf("expected pos 'item', got %q", *pos)
+	}
+
+	// Dash-prefixed string value
+	p2 := NewArgumentParser("test", "")
+	t2 := p2.String("-title")
+	if err := p2.Parse([]string{"-title", "-draft"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if *t2 != "-draft" {
+		t.Errorf("expected '-draft', got %q", *t2)
+	}
+
+	// Empty bool= value must fail
+	p3 := NewArgumentParser("test", "")
+	p3.Bool("--flag")
+	if err := p3.Parse([]string{"--flag="}); err == nil {
+		t.Fatal("expected error for --flag= with empty boolean value")
+	}
+}
+
+func TestSubcommandHelpAndDeterministicUsage(t *testing.T) {
+	p := NewArgumentParser("za", "root")
+	p.NewCommand("zeta", "last")
+	p.NewCommand("alpha", "first")
+	sub := p.NewCommand("mid", "middle")
+
+	if err := p.Parse([]string{"mid", "--help"}); err != ErrHelp {
+		t.Errorf("expected ErrHelp from subcommand, got %v", err)
+	}
+	if !sub.Invoked() {
+		t.Error("expected subcommand to be marked invoked")
+	}
+
+	usage := p.Usage()
+	idxAlpha := strings.Index(usage, "alpha")
+	idxMid := strings.Index(usage, "mid")
+	idxZeta := strings.Index(usage, "zeta")
+	if idxAlpha == -1 || idxMid == -1 || idxZeta == -1 || !(idxAlpha < idxMid && idxMid < idxZeta) {
+		t.Errorf("expected deterministic alphabetical subcommands in Usage, got:\n%s", usage)
+	}
+}

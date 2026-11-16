@@ -7,8 +7,8 @@ import (
 )
 
 func ExampleListOpeners() {
-	// List all registered database openers
-	// Note: In a real application, SQLite opener is auto-registered on import
+	// List all registered database openers.
+	// Consumers register their own Opener implementations (e.g. from init).
 	openers := sqlt.ListOpeners()
 	// The actual number depends on what's registered
 	if len(openers) >= 0 {

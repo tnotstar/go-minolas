@@ -3,6 +3,7 @@ package argparse
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -75,7 +76,13 @@ func (p *ArgumentParser) Usage() string {
 	// Subcommands
 	if len(p.subcommands) > 0 {
 		sb.WriteString("Commands:\n")
-		for name, cmd := range p.subcommands {
+		names := make([]string, 0, len(p.subcommands))
+		for name := range p.subcommands {
+			names = append(names, name)
+		}
+		slices.Sort(names)
+		for _, name := range names {
+			cmd := p.subcommands[name]
 			sb.WriteString(fmt.Sprintf("  %-20s %s\n", name, cmd.Description))
 		}
 		sb.WriteString("\n")
